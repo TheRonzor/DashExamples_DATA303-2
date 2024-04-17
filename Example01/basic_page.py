@@ -11,18 +11,11 @@ from datetime import datetime as dt
 import numpy as np
 
 TITLE = 'Hello World!'
+FIG_ID = 'my-figure'
 
-def apply_main_layout(app: Dash) -> None:
-    layout = html.Div(id='main-div',
-                      children=[
-                          html.H1('Welcome to my website!'), # H1 is the largest header
-                          html.Hr(),
-                          html.H2("Let's make a figure... next class!")
-                      ])
-    app.layout = layout
-    return
+TAU = 2*np.pi
 
-if __name__ == '__main__':
+def run_app() -> None:
     # Create a Dash app
     my_app = Dash(__name__)
 
@@ -35,3 +28,29 @@ if __name__ == '__main__':
     # Run the app in debug mode
     # Don't use debug mode when you publish your code (or submit your final)
     my_app.run(debug=True)
+
+    return
+
+def make_figure() -> go.Figure:
+    x = np.linspace(0,10,5000)
+    y = np.sin(TAU*x)
+
+    fig = px.scatter(None,x,y)
+
+    return fig
+
+def apply_main_layout(app: Dash) -> None:
+    layout = html.Div(id='main-div',
+                      children=[
+                          html.H1('Welcome to my website!'), # H1 is the largest header
+                          html.Hr(),
+                          html.H2("Here is a figure!"),
+                          dcc.Graph(id=FIG_ID,
+                                    figure = make_figure()
+                                    )
+                      ])
+    app.layout = layout
+    return
+
+if __name__ == '__main__':
+    run_app()
