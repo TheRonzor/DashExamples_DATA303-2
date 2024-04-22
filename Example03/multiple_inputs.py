@@ -93,7 +93,7 @@ def make_figure(freq: int = 1,
     fig.add_annotation(
         xref='paper',
         yref='paper',
-        x=-0.03,
+        x=-0.06,
         y=0.5,
         text='$y$',
         font_size=LABEL_SIZE,
@@ -126,43 +126,55 @@ def echo_num_points(val):
     return f'Number of points: {val}'
 
 def apply_main_layout(app: Dash) -> None:
+    content=[]
+
+    greeting = html.H1('Welcome to my website!')
+    figure_title = html.H2("Here is a figure!")
+    freq_display = dcc.Markdown(id=FREQ+DISPLAY_SUFFIX,
+                                mathjax=True
+                                )
+    freq_slider = dcc.Slider(id=FREQ,
+                             min=USER_INPUT[FREQ]['min'],
+                             max=USER_INPUT[FREQ]['max'],
+                             step=USER_INPUT[FREQ]['step'],
+                             value=USER_INPUT[FREQ]['init']
+                             )
+    num_points_display = dcc.Markdown(id=NUM_POINTS+DISPLAY_SUFFIX,
+                                      mathjax=True
+                                      )
+    num_points_slider = dcc.Slider(id=NUM_POINTS,
+                                   min=USER_INPUT[NUM_POINTS]['min'],
+                                   max=USER_INPUT[NUM_POINTS]['max'],
+                                   step=USER_INPUT[NUM_POINTS]['step'],
+                                   value=USER_INPUT[NUM_POINTS]['init'],
+                                   marks=None,
+                                   tooltip={'template': '{value}'}
+                                   )
+    func_display = dcc.Markdown(id=FUNC_DISPLAY,
+                                mathjax=True,
+                                style={'text-align': 'center'}
+                                )
+    my_figure = dcc.Graph(id=FIG_ID,
+                          figure=make_figure()[0],
+                          mathjax=True
+                          )
+    
+    content.append(greeting)
+    content.append(html.Hr())
+    content.append(figure_title)
+    content.append(freq_display)
+    content.append(freq_slider)
+    content.append(num_points_display)
+    content.append(num_points_slider)
+    content.append(func_display)
+    content.append(my_figure)
+
     layout = html.Div(id='main-div',
                       style={'margin': 'auto',
                              'width': '50%'
                              },
-                      children=[
-                          html.H1('Welcome to my website!'), # H1 is the largest header
-                          html.Hr(),
-                          html.H2("Here is a figure!"),
-                          dcc.Markdown(id=FREQ+DISPLAY_SUFFIX,
-                                       mathjax=True
-                                       ),
-                          dcc.Slider(id=FREQ,
-                                     min=USER_INPUT[FREQ]['min'],
-                                     max=USER_INPUT[FREQ]['max'],
-                                     step=USER_INPUT[FREQ]['step'],
-                                     value=USER_INPUT[FREQ]['init'],
-                                     ),
-                          dcc.Markdown(id=NUM_POINTS+DISPLAY_SUFFIX,
-                                       mathjax=True
-                                       ),
-                          dcc.Slider(id=NUM_POINTS,
-                                     min=USER_INPUT[NUM_POINTS]['min'],
-                                     max=USER_INPUT[NUM_POINTS]['max'],
-                                     step=USER_INPUT[NUM_POINTS]['step'],
-                                     value=USER_INPUT[NUM_POINTS]['init'],
-                                     marks=None,
-                                     tooltip={'template': '{value}'}
-                                     ),
-                          dcc.Markdown(id=FUNC_DISPLAY,
-                                       mathjax=True,
-                                       style={'text-align': 'center'}
-                                       ),
-                          dcc.Graph(id=FIG_ID,
-                                    figure=make_figure()[0],
-                                    mathjax=True
-                                    )
-                      ])
+                      children=content
+                      )
     app.layout = layout
     return
 
