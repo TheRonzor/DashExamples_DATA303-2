@@ -12,11 +12,17 @@ from dash import Dash, html, dcc, Input, Output, callback
 from datetime import datetime as dt
 import numpy as np
 
+LABEL_SIZE = 18
+
 TITLE = 'Hello World!'
 FIG_ID = 'my-figure'
 
 FREQ = 'sine-frequency'
 NUM_POINTS = 'num-points'
+FUNC_DISPLAY = 'sine-function'
+
+DISPLAY_SUFFIX = '-display'
+
 USER_INPUT = {FREQ: {'id'   : FREQ,
                      'min'  : 0,
                      'max'  : 10,
@@ -51,7 +57,11 @@ def run_app() -> None:
 
 @callback(
         Output(component_id=FIG_ID,
-               component_property='figure'),
+               component_property='figure'
+               ),
+        Output(component_id=FUNC_DISPLAY,
+               component_property='children'
+               ),
         Input(component_id=FREQ,
               component_property = 'value'
               ),
@@ -70,28 +80,87 @@ def make_figure(freq: int = 1,
 
     fig = px.scatter(None,x,y)
 
-    return fig
+    fig.update_layout(
+        margin={'t': 0},
+        xaxis={
+                'title': '$x$',
+                'title_font_size': LABEL_SIZE
+               },
+        yaxis={'title': None}
+
+    )
+
+    fig.add_annotation(
+        xref='paper',
+        yref='paper',
+        x=-0.03,
+        y=0.5,
+        text='$y$',
+        font_size=LABEL_SIZE,
+        showarrow=False
+    )
+    
+    equation = f'$y=\sin({freq*TAU:.3f})$'
+    return fig, equation
+
+@callback(
+        Output(component_id=FREQ+DISPLAY_SUFFIX,
+               component_property='children'
+               ),
+        Input(component_id=FREQ,
+              component_property='value'
+              )
+)
+def echo_freq(val):
+    return f'Freq: ${val} \cdot (2\pi)$'
+
+@callback(
+        Output(component_id=NUM_POINTS+DISPLAY_SUFFIX,
+               component_property='children'
+              ),
+        Input(component_id=NUM_POINTS,
+              component_property='value'
+              )
+)
+def echo_num_points(val):
+    return f'Number of points: {val}'
 
 def apply_main_layout(app: Dash) -> None:
     layout = html.Div(id='main-div',
+                      style={'margin': 'auto',
+                             'width': '50%'
+                             },
                       children=[
                           html.H1('Welcome to my website!'), # H1 is the largest header
                           html.Hr(),
                           html.H2("Here is a figure!"),
+                          dcc.Markdown(id=FREQ+DISPLAY_SUFFIX,
+                                       mathjax=True
+                                       ),
                           dcc.Slider(id=FREQ,
                                      min=USER_INPUT[FREQ]['min'],
                                      max=USER_INPUT[FREQ]['max'],
                                      step=USER_INPUT[FREQ]['step'],
                                      value=USER_INPUT[FREQ]['init'],
                                      ),
+                          dcc.Markdown(id=NUM_POINTS+DISPLAY_SUFFIX,
+                                       mathjax=True
+                                       ),
                           dcc.Slider(id=NUM_POINTS,
                                      min=USER_INPUT[NUM_POINTS]['min'],
                                      max=USER_INPUT[NUM_POINTS]['max'],
                                      step=USER_INPUT[NUM_POINTS]['step'],
                                      value=USER_INPUT[NUM_POINTS]['init'],
+                                     marks=None,
+                                     tooltip={'template': '{value}'}
                                      ),
+                          dcc.Markdown(id=FUNC_DISPLAY,
+                                       mathjax=True,
+                                       style={'text-align': 'center'}
+                                       ),
                           dcc.Graph(id=FIG_ID,
-                                    figure=make_figure()
+                                    figure=make_figure()[0],
+                                    mathjax=True
                                     )
                       ])
     app.layout = layout
